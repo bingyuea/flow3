@@ -48,14 +48,52 @@
       NodeElement
     },
     props: {
-      materialList: Array
+      materialList: Array,
+      devices: {
+        type: Object,
+        default: () => {
+          return {}
+        }
+      }
     },
     data () {
       return {}
     },
     computed: {
-      materials () {
-        return this.materialList.filter(item => item.enable)
+      materials() {
+        const materials = []
+        if (this.devices && Object.entries(this.devices).length) {
+          for (let k in this.devices) {
+            const temp = {
+              name: this.devices[k][0].type || '',
+              label: this.devices[k][0].type || '',
+              icon: '',
+              enable: true,
+              children: this.devices[k].map(item => {
+                  const height = $X.$X.iconStyle[item.name].height
+                  const width = $X.$X.iconStyle[item.name].width
+                  return {
+                    shape: item.name,
+                    originId: item.id,
+                    label: item.name,
+                    data: JSON.stringify(item),
+                    defaultLabel: '',
+                    enable: true,
+                    width: Number(width) / 2,
+                    height: Number(height) / 2,
+                    minWidth: 20,
+                    minHeight: 20,
+                    anchorPoints: $X.$X.iconStyle[item.name].anchorPoints,
+                    shapeControl: $X.$X.shapeControl,
+                    icon: item.imgUrl
+                  }
+                }
+              )
+            }
+            materials.push(temp)
+          }
+        }
+        return materials
       }
     },
     methods: {

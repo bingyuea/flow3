@@ -272,6 +272,7 @@
         // 绑定事件
         _t.editor.on('canvas:mousedown', _t._canvasMousedown)
         // 绑定事件
+        _t.editor.on('node:click', _t._nodeClick)
         _t.editor.on('node:mousedown', _t._nodeMousedown)
         _t.editor.on('node:mouseover', _t._nodeHover)
         _t.editor.on('node:mouseout', _t._nodeOut)
@@ -323,6 +324,13 @@
         // 更新currentItem
         _t.currentItem = []
       },
+      _nodeClick: _.debounce(function (event) {
+        let _t = this
+        const id = event.item._cfg.model && event.item._cfg.model.originId
+        this.eventItem = event.item
+        if (id) this.getOriginData(id)
+        _t.editor.setItemState(event.item, 'active', true)
+      }),
       _nodeMousedown (event) {
         const _t = this
         _t.doClearAllStates()
@@ -424,7 +432,7 @@
           data: info.data,
           label: info.defaultLabel,
           labelCfg: {
-            position: 'center',
+            position: 'bottom',
             style: {
               fontSize: 16,
               stroke: '#000000'
@@ -618,7 +626,7 @@
             break
           }
           case 'edit': {
-            _t.doSetMode(info.name)
+            _t.doSetMode(info.data)
             break
           }
           case 'fill': {
@@ -943,6 +951,9 @@
             })
             break
           }
+          case 'canvasBackgroundColor':
+            _t.editor.emit('background:set', info.data)
+            break
           case 'canvasBackground': {
             switch (info.data) {
               case 'default':
@@ -1070,6 +1081,47 @@
           ..._t.defInfo,
           ...data
         }
+      },
+      openDownloadDialog (blob, fileName) {
+        if (typeof blob === 'object' && blob instanceof Blob) {
+          blob = URL.createObjectURL(blob) // 创建blob地址
+        }
+        var aLink = document.createElement('a')
+        aLink.href = blob
+        // HTML5新增的属性，指定保存文件名，可以不要后缀，注意，有时候 file:///模式下不会生效
+        aLink.download = fileName || ''
+        var event
+        if (window.MouseEvent) event = new MouseEvent('click')
+        //   移动端
+        else {
+          event = document.createEvent('MouseEvents')
+          event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+        }
+        aLink.dispatchEvent(event)
+      },
+      workbook2blob (workbook) {
+        // 生成excel的配置项
+        var wopts = {
+          // 要生成的文件类型
+          bookType: 'xlsx',
+          // // 是否生成Shared String Table，官方解释是，如果开启生成速度会下降，但在低版本IOS设备上有更好的兼容性
+          bookSST: false,
+          type: 'binary'
+        }
+        var wbout = XLSX.write(workbook, wopts)
+
+        // 将字符串转ArrayBuffer
+        function s2ab (s) {
+          var buf = new ArrayBuffer(s.length)
+          var view = new Uint8Array(buf)
+          for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xff
+          return buf
+        }
+
+        var blob = new Blob([s2ab(wbout)], {
+          type: 'application/octet-stream'
+        })
+        return blob
       },
       bindShortcuts () {
         const _t = this

@@ -19,7 +19,38 @@ export default {
       draggable: true
     })
     this.keyShape = keyShape
+    this.drawIcon(cfg, group)
     return keyShape
+  },
+  drawIcon (cfg, group) {
+    let width, height
+    const size = this.getSize(cfg)
+    width = size[0]
+    height = size[1]
+    if (this.options.icon) {
+      const attrs = {
+        x: this.options.iconStyle.left,
+        y: this.options.iconStyle.top,
+        width,
+        height
+      }
+      group.icon = group.addShape('image', {
+        attrs: {
+          img: this.options.icon,
+          ...attrs
+        },
+        draggable: true,
+        name: 'image-shape'
+      })
+    }
+  },
+  ShowObjProperty1 (Obj) {
+    var attributes = ''
+    var methods = ''
+    for (const attr in Obj) {
+      if (Obj.attr != null) { attributes = attributes + attr + ' 属性： ' + Obj.i + '\r\n' } else { methods = methods + '方法: ' + attr + '\r\n' }
+    }
+    console.log(attributes, methods)
   },
   getAnchorPoints (cfg) {
     const { anchorPoints, width, height } = cfg
@@ -62,6 +93,8 @@ export default {
     const style = G6Util.mix({}, defaultStyle, shapeStyle)
     // 更新图形
     this.updateShape(cfg, item, style)
+    const group = item.getContainer()
+    group.icon.attr(style)
   },
   updateShape (cfg, item, style) {
     const keyShape = item.get('keyShape')
