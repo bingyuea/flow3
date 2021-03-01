@@ -19,8 +19,8 @@
   <div class="materials-editor" @click="handleEditorClick" @contextmenu.stop.prevent>
     <ToolBar :editorData="editorData" :toolList="toolList" :currentItem="currentItem"></ToolBar>
     <Sketchpad></Sketchpad>
-    <PanelLeft :materialList="materialList"></PanelLeft>
-    <PanelRight :editorConfig="editorConfig" :toolList="toolList" :currentItem="currentItem"></PanelRight>
+    <PanelLeft :materialList="materialList" :devices='devices'></PanelLeft>
+    <PanelRight :editorConfig="editorConfig" :toolList="toolList" :currentItem="currentItem" :originDataObj='originDataObj' :eventItem='eventItem'></PanelRight>
     <PreviewModel></PreviewModel>
     <ContextMenu :editorData="editorData" :toolList="toolList"></ContextMenu>
     <AboutXFC ref="aboutXFC"></AboutXFC>
@@ -49,7 +49,9 @@
   import screenfull from 'screenfull'
   // 热键
   import Mousetrap from 'mousetrap'
-
+  import { getDevice, getSvgById } from '../api/svg'
+  import XLSX from 'xlsx'
+  import _ from 'lodash'
   export default {
     name: 'MaterialsEditor',
     components: {
@@ -71,6 +73,9 @@
     },
     data () {
       return {
+        devices: {},
+        eventItem: {},
+        originDataObj: {},
         editorInfo: {},
         defInfo: {
           // 编辑器状态：add || edit || preview
@@ -103,6 +108,22 @@
       }
     },
     methods: {
+      getDevices () {
+        const res = {
+          data: ''
+        }
+        if (localStorage.getItem('devices')) {
+          res.data = JSON.parse(localStorage.getItem('devices'))
+          this.devices = _.groupBy(res.data, 'typeId')
+        } else {
+          getDevice().then(res => {
+            localStorage.setItem('devices', JSON.stringify(res.data))
+            this.devices = _.groupBy(res.data, 'typeId')
+            window.location.reload()
+          })
+        }
+        this.devices = _.groupBy(res.data, 'typeId')
+      },
       init () {
         const _t = this
         // 初始化存储数据
@@ -191,6 +212,18 @@
                 }
               }
             ],
+            // 微调
+            paramsEdit: [
+              {
+                type: 'params-control',
+                config: {
+                  dragNode: {
+                    // 是否在拖拽节点时更新所有与之相连的边
+                    updateEdge: false
+                  }
+                }
+              }
+            ],
             // 只读，
             preview: [
               'zoom-canvas',
@@ -217,6 +250,8 @@
         // 挂载G6配置
         _t.editor.$C = G6.$C
         // 挂载编辑器$D命名空间，用于Vue组件与Graph之间传值
+        // 挂载设备
+        this.getDevices()
         _t.editor.$D = {
           fill: '#FFFFFF',
           fillOpacity: 1,
@@ -385,6 +420,8 @@
           id: G6Util.uniqueId(),
           draggable: true,
           type: info.type,
+          originId: info.originId,
+          data: info.data,
           label: info.defaultLabel,
           labelCfg: {
             position: 'center',
@@ -404,6 +441,23 @@
         }
         // 广播事件，通过自定义交互 node-control 添加节点
         _t.editor.emit('editor:addNode', node)
+      },
+      doEditorClick: _.debounce(function (info) {
+        // 左边和右边联动
+        const _t = this
+        const id = JSON.parse(info.data).id
+        _t.getOriginData(id)
+      }, 300),
+      getOriginData (id) {
+        const originDataObj = JSON.parse(localStorage.getItem('originDataObj' + String(id)))
+        if (originDataObj) {
+          this.originDataObj = { ...originDataObj }
+        } else {
+          getSvgById(id).then(res => {
+            this.originDataObj = { originData: res.data, originId: id }
+            localStorage.setItem('originDataObj' + String(id), JSON.stringify({ originData: res.data, originId: id }))
+          })
+        }
       },
       doSetMode (name) {
         const _t = this
@@ -847,6 +901,34 @@
               link.click()
               // no longer need to read the blob so it's revoked
               URL.revokeObjectURL(url)
+            } else if (info.data === 'excel') {
+              const wb = XLSX.utils.book_new()
+              const dataList = []
+              _t.editor.getNodes().forEach((node, index) => {
+                const model = node.getModel()
+                if (model.params) {
+                  dataList.push(model.params)
+                }
+              })
+              if (!dataList.length) return
+              const excelData = _.groupBy(dataList, 'originId')
+              Object.entries(excelData).forEach(sheet => {
+                const sheetData = sheet[1]
+                const sheetName = sheetData[0].form.modelName
+                const s = sheetData.map((row, rowIndex) => {
+                  let obj = {}
+                  row.paramList.map(cell => {
+                    const name = cell.name
+                    obj = { 'uid': rowIndex, ...obj, [name]: cell.defaultValue }
+                  })
+                  return obj
+                })
+                console.log(s)
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(s), sheetName)
+              })
+              // let sheetData = [{department: "行政部", count: 2}, {department: "前端部", count: 2}];
+              const workbookBlob = this.workbook2blob(wb)
+              this.openDownloadDialog(workbookBlob, `GUI.xlsx`)
             }
             break
           }
@@ -1149,6 +1231,9 @@
       _t.$nextTick(_t.init)
 
       _t.$X.utils.bus.$on('editor/add/node', _t.doAddNode)
+      _t.$X.utils.bus.$on('editor/click', function (data) {
+        _t.doEditorClick(data)
+      })
       _t.$X.utils.bus.$on('editor/tool/trigger', _t.handleToolTrigger)
       _t.$X.utils.bus.$on('editor/currentItem/update', function (data) {
         _t.editor.emit('editor:setItem', data)
