@@ -682,11 +682,12 @@ export default {
       createNode (event) {
         const _t = this
         if (_t.dragNode.dottedNode && _t.info.node) {
-          const { width, height, minWidth, minHeight, label, type } = _t.info.node
+          const { width, height, minWidth, minHeight, label } = _t.info.node
+          console.log(_t.info.node)
           const node = {
             ..._t.info.node,
             id: G6Util.uniqueId(),
-            name: 'XFC_NODE_' + utils.common.firstUpperCase(type),
+            name: 'XFCNodeKeyShape',
             draggable: true,
             x: event.x,
             y: event.y,

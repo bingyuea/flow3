@@ -9,7 +9,6 @@ import utils from '../utils'
 export default {
   type: null,
   // 自定义节点配置，需要配置时在各个图形中覆写
-  options: {},
   drawShape (cfg, group) {
     const shapeType = this.shapeType
     const style = this.getShapeStyle(cfg)
@@ -53,31 +52,12 @@ export default {
     console.log(attributes, methods)
   },
   getAnchorPoints (cfg) {
-    const { anchorPoints, width, height } = cfg
-    const keyShape = this.keyShape
-    const points = []
-    if (anchorPoints && anchorPoints.length) {
-      for (let i = 0, len = anchorPoints.length; i < len; i++) {
-        const point = keyShape.getPoint((i + 1) / len)
-        // 方式一：通过坐标反推占比
-        const x = point.x
-        const y = point.y
-        // 坐标系转换
-        const x1 = width / 2 + x
-        const y1 = height / 2 + y
-        // 百分比
-        const px = x1 / width
-        const py = y1 / height
-        points.push([ px, py ])
-        // 方式二：覆盖坐标，有BUG
-        // points.push([...anchorPoints[i], {
-        //   x: bbox.minX + point.x,
-        //   y: bbox.minY + point.y
-        // }])
-      }
-    }
-    // console.log('points', points)
-    return points
+    return [
+      [0.5, 0], // top
+      [1, 0.5], // right
+      [0.5, 1], // bottom
+      [0, 0.5] // left
+    ]
   },
   setState (name, value, item) {
     // 设置锚点状态
@@ -102,7 +82,7 @@ export default {
       ...style
     })
     // 更新图形文本
-    this.updateLabel(cfg, item)
+    // this.updateLabel(cfg, item)
   },
   // 绘制完成后附加锚点
   afterDraw (cfg, group) {

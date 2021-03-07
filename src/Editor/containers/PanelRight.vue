@@ -19,7 +19,7 @@
       <Options :editorConfig="editorConfig" :toolList="toolList" :currentItem="currentItem"></Options>
     </CardItem>
     <CardItem title="属性设置" :enableFold="true" :bold="true">
-      <Details :originDataObj='originDataObj' :eventItem='eventItem'></Details>
+      <Details :editorConfig="editorConfig" :toolList="toolList" :currentItem="currentItem" :originDataObj='originDataObj' :eventItem='eventItem'></Details>
     </CardItem>
   </CardBox>
 </template>
@@ -36,7 +36,7 @@
       CardBox,
       CardItem,
       Options,
-      Details,
+      Details
     },
     props: {
       editorConfig: Object,
@@ -48,6 +48,12 @@
           return {}
         }
       },
+      eventItem: {
+        type: Object,
+        default: () => {
+          return {}
+        }
+      }
     },
     computed: {
       infoPanel () {

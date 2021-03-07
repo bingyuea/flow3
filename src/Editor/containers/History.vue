@@ -67,7 +67,8 @@
 </template>
 
 <script>
-  import G6 from '@antv/g6'
+  import G6 from '@/global/g6/index'
+
   export default {
     name: 'History',
     data () {

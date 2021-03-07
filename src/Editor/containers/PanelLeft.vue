@@ -48,7 +48,7 @@
       NodeElement
     },
     props: {
-      materialList: Array,
+      materialList: {},
       devices: {
         type: Object,
         default: () => {
@@ -60,34 +60,34 @@
       return {}
     },
     computed: {
-      materials() {
+      materials () {
         const materials = []
         if (this.devices && Object.entries(this.devices).length) {
-          for (let k in this.devices) {
+          for (const k in this.devices) {
             const temp = {
               name: this.devices[k][0].type || '',
               label: this.devices[k][0].type || '',
               icon: '',
               enable: true,
               children: this.devices[k].map(item => {
-                  const height = $X.$X.iconStyle[item.name].height
-                  const width = $X.$X.iconStyle[item.name].width
-                  return {
-                    shape: item.name,
-                    originId: item.id,
-                    label: item.name,
-                    data: JSON.stringify(item),
-                    defaultLabel: '',
-                    enable: true,
-                    width: Number(width) / 2,
-                    height: Number(height) / 2,
-                    minWidth: 20,
-                    minHeight: 20,
-                    anchorPoints: $X.$X.iconStyle[item.name].anchorPoints,
-                    shapeControl: $X.$X.shapeControl,
-                    icon: item.imgUrl
-                  }
+                const height = this.materialList.iconStyle[item.name].height
+                const width = this.materialList.iconStyle[item.name].width
+                return {
+                  shape: item.name,
+                  originId: item.id,
+                  label: item.name,
+                  data: JSON.stringify(item),
+                  defaultLabel: '',
+                  enable: true,
+                  width: Number(width) / 2,
+                  height: Number(height) / 2,
+                  minWidth: 20,
+                  minHeight: 20,
+                  anchorPoints: this.materialList.iconStyle[item.name].anchorPoints,
+                  shapeControl: this.materialList.shapeControl,
+                  icon: item.imgUrl
                 }
+              }
               )
             }
             materials.push(temp)

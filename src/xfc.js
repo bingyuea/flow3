@@ -14,6 +14,9 @@ import config from './config'
 import './assets/styles/main.less'
 
 import vClickOutside from 'v-click-outside'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+Vue.use(ElementUI, { size: 'small' })
 
 export default function (options) {
   const { el, props } = options
@@ -50,7 +53,7 @@ export default function (options) {
     }
   } else {
     config.tools = config.tools(config.system)
-    config.materials = config.materials()
+    // config.materials = config.materials()
     config.background = {}
   }
 

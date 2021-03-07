@@ -6,8 +6,8 @@
 
 <style scoped lang="less" rel="stylesheet/less">
   .node-element {
-    display: inline-block;
     margin: 2px;
+    text-align: center;
     border: 1px solid transparent;
 
     &:hover {
@@ -22,7 +22,8 @@
       .icon {
         left: 1px;
         top: 1px;
-        width: 32px;
+        text-align: center;
+        width: 100%;
         height: 30px;
         display: block;
         position: relative;
@@ -39,8 +40,8 @@
     @mousedown="handleMouseDown"
   >
     <div class="content" :title="title">
-      <svg class="icon" v-html="info.icon">
-      </svg>
+      <img class="icon" :src="info.icon" />
+      <div>{{info.label}}</div>
     </div>
   </div>
 </template>
@@ -62,7 +63,7 @@
             label: 'circle',
             enable: true,
             width: 40,
-            height: 40,
+            height: 60,
             anchorPoints: [ [0, 0], [0, 1], [1, 0], [1, 1] ],
             svg: ``
           }
@@ -74,7 +75,7 @@
       },
       height: {
         type: Number,
-        default: 40
+        default: 60
       }
     },
     computed: {
@@ -82,7 +83,7 @@
         const _t = this
         const style = {}
         if (_t.width) {
-          style.width = _t.width + 'px'
+          // style.width = _t.width + 'px'
         }
         if (_t.height) {
           style.height = _t.height + 'px'

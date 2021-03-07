@@ -425,6 +425,7 @@
       doAddNode (info) {
         const _t = this
         const node = {
+          ...info,
           id: G6Util.uniqueId(),
           draggable: true,
           type: info.type,
@@ -1283,9 +1284,10 @@
       _t.$nextTick(_t.init)
 
       _t.$X.utils.bus.$on('editor/add/node', _t.doAddNode)
-      _t.$X.utils.bus.$on('editor/click', function (data) {
-        _t.doEditorClick(data)
-      })
+      // _t.$X.utils.bus.$on('editor/click', function (data) {
+      //
+      //   _t.doEditorClick(data)
+      // })
       _t.$X.utils.bus.$on('editor/tool/trigger', _t.handleToolTrigger)
       _t.$X.utils.bus.$on('editor/currentItem/update', function (data) {
         _t.editor.emit('editor:setItem', data)

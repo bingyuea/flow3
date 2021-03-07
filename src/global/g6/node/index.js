@@ -9,7 +9,6 @@ import arrow from './arrow'
 import $X from '../../../config/materials'
 import * as G6Util from '@antv/util'
 import base from './base'
-
 const obj = {
   ...general,
   ...arrow
@@ -67,12 +66,14 @@ export default function (G6, devices) {
       }
     })
   }
+  console.log(devices)
   const obj2 = {}
   devices && devices.map((e) => {
     obj2[e.name] = e
   })
-
   Object.assign(obj, obj2)
+  console.log(obj2)
+  console.log(obj)
   Object.values(obj).map(item => {
     G6.registerNode(item.name, item.options, item.extendName)
   })

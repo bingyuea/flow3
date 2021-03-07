@@ -31,6 +31,7 @@
           :disabled="preview"
           style='width:100%'
           clearable
+          placeholder="请输入"
         >
           <el-option
             v-for="item in tagNameList"
@@ -47,6 +48,7 @@
           :disabled="preview"
           style='width:100%'
           clearable
+          placeholder="请输入"
         >
           <el-option
             v-for="item in modelNameList"
@@ -81,8 +83,6 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
-
   export default {
     data () {
       return {
@@ -98,6 +98,9 @@
     },
     name: 'Details',
     props: {
+      editorConfig: Object,
+      toolList: Array,
+      currentItem: Array,
       originDataObj: {
         type: Object,
         default: () => {
@@ -165,10 +168,6 @@
       }
     },
     computed: {
-      ...mapGetters([
-        'editor',
-        'currentItem'
-      ]),
       originData () {
         return this.originDataObj.originData || []
       },
