@@ -19,6 +19,7 @@ export default {
     })
     this.keyShape = keyShape
     this.drawIcon(cfg, group)
+    console.log(cfg,group)
     return keyShape
   },
   drawIcon (cfg, group) {
@@ -82,7 +83,7 @@ export default {
       ...style
     })
     // 更新图形文本
-    // this.updateLabel(cfg, item)
+    this.updateLabel(cfg, item)
   },
   // 绘制完成后附加锚点
   afterDraw (cfg, group) {

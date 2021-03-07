@@ -424,6 +424,7 @@
       },
       doAddNode (info) {
         const _t = this
+        console.log(info,'----------')
         const node = {
           ...info,
           id: G6Util.uniqueId(),
